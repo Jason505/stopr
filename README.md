@@ -1,4 +1,4 @@
-# stopr
+![stopr](https://github.com/Jason505/stopr/blob/master/logo.png)
 Python-based stock prediction app
 
 **How to install:**</br>
@@ -8,7 +8,5 @@ Python-based stock prediction app
 numpy, pandas, yfinance, matplotlib, tensorflow, keras, joblib, importlib, sklearn, dateutil
 
 **Important note:**</br>
-You can install all packages at once by separating them with space</br>
-e.g. "pip install package1 package2 package3..."</br>
-However, if somewhere an error occurs, the whole installation will cancel.</br>
-It is recomended to install packages one by one.</br>
+You can install all packages at once by separating them with space, e.g. "pip install package1 package2 package3..."</br>
+However, if somewhere an error occurs, the whole installation will cancel. It is recomended to install packages one by one.
