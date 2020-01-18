@@ -1,5 +1,6 @@
 ![stopr](https://github.com/Jason505/stopr/blob/master/logo.png)
-Python-based stock prediction app
+
+*Python-based stock prediction app*
 
 **How to install:**</br>
 1. Download Python (version 3.7.x)
