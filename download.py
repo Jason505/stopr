@@ -4,14 +4,16 @@ import os
 import yfinance as yf
 
 forceUpdate = True
-# Let user choose ticker, default AAL
 ticker = "MSFT"
+
+# Let user choose ticker to predict, default is MSFT (Microsoft)
+# TODO add check if the ticker exists
 print("Type custom ticker or press Enter to continue with preselected ticker")
 print("Default: " + ticker)
 userInput = input()
 if userInput != "":
     ticker = userInput
-print("Using company " + ticker + " as a data source...\n")
+print("Using company " + ticker + " as a data source . . .\n")
 
 # Paths for storing user data
 appPath = os.path.join(os.getenv("APPDATA"), "Stopr")
@@ -26,12 +28,15 @@ if not os.path.exists(filesPath):
     os.mkdir(filesPath)
 else:
     print("Do you want to force update data? [Y/N}")
-    if str.lower(input()) == "n":
+    userInput = input()
+    if str.lower(userInput) == "n":
         forceUpdate = False
+    elif str.lower(userInput) != "y":
+        print("Invalid entry, assuming \"Y\" as an answer . . .")
 
 # Download, sort and save data if forceUpdate is enabled
 if forceUpdate:
-    data = yf.download(ticker, period="5Y").to_csv()
+    data = yf.download(ticker, period="5Y", prepost=True).to_csv()
     with open(dataPath, "w+") as f:
         f.write(data)
     df = pd.read_csv(dataPath)
@@ -42,4 +47,4 @@ if forceUpdate:
 
 # Write important global variables to configfile
 with open("config.py", "w+") as f:
-    f.write("ticker = " + "\"" + ticker + "\"")
+    f.write("ticker = " + "\"" + ticker + "\"\n")

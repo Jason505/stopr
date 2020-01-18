@@ -22,24 +22,32 @@ timeShift = futureSteps
 
 # Write variables to config.py
 with open("config.py", "a") as f:
-    f.write("\npastSteps = " + str(pastSteps))
-    f.write("\nfutureSteps = " + str(futureSteps))
-    f.write("\ntimeShift = " + str(timeShift))
+    try:
+        config.pastSteps
+    except NameError:
+        f.write("\npastSteps = " + str(pastSteps))
+    try:
+        config.futureSteps
+    except NameError:
+        f.write("\nfutureSteps = " + str(futureSteps))
+    try:
+        config.timeShift
+    except NameError:
+        f.write("\ntimeShift = " + str(timeShift))
 
+# Paths for storing user data
 folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 scalerPath = os.path.join(folderPath, "scaler.dat")
 
+# Take "Close" column of data.csv, scale it and save as a new column. Also, save the scaler for future descaling.
 df = pd.read_csv(dataPath)
-data = df["Close"]
-numpyData = data.to_numpy()
+data = df["Close"].to_numpy()
 
-# Scale the dataset and save it to data.csv as a new column, then save the scaler to ticker folder
 scaler = MinMaxScaler(feature_range=(0, 1))
-scaledData = scaler.fit_transform(numpyData.reshape(-1, 1))
+scaledData = scaler.fit_transform(data.reshape(-1, 1))
 joblib.dump(scaler, scalerPath)
 
-# Save scaled data to data.csv
 df["Scaled"] = scaledData
 df.to_csv(dataPath, index=False)
 
@@ -50,7 +58,7 @@ if predictLength < 0:
 trainData = scaledData[:predictLength-pastSteps]
 trainData = np.reshape(trainData, (len(trainData), 1))
 
-# In trainX will be *pastSteps* values, and in trainY will be wanted result.
+# In trainX will be *pastSteps* values, and in trainY will be wanted value.
 trainX = np.array([])
 trainY = np.array([])
 
@@ -58,7 +66,8 @@ for i in range(pastSteps, len(trainData)):
     trainX = np.append(trainX, trainData[i - pastSteps:i, 0])
     trainY = np.append(trainY, trainData[i, 0])
 
-# Convert data sets to more friendly format for LSTM and reshape it to 3D
+# Reshape data to 3D, first dimension is count of output data, second defines from how many values it will be
+# predicted, and the last dimension is set to 1 (because we have only one type of data)
 trainX = np.reshape(trainX, (int(len(trainX)/pastSteps), pastSteps, 1))
 
 # Build and compile the model, then save it to TICKER dir
