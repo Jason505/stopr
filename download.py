@@ -46,5 +46,8 @@ if forceUpdate:
     df.to_csv(dataPath)
 
 # Write important global variables to configfile
-with open("config.py", "w+") as f:
-    f.write("ticker = " + "\"" + ticker + "\"\n")
+with open("config.py", "a") as f:
+    try:
+        config.ticker
+    except NameError:
+        f.write("ticker = " + "\"" + ticker + "\"\n")
