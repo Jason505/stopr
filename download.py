@@ -1,7 +1,12 @@
-# Download and prepair data table for predicting
+# Download and prepare data table for predicting
 import pandas as pd
 import os
 import yfinance as yf
+
+# Reload config for eventual changes
+import importlib
+import config
+importlib.reload(config)
 
 forceUpdate = True
 ticker = "MSFT"

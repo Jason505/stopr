@@ -20,6 +20,20 @@ futureSteps = 100
 # Do we want to predict historic data or *real* future data?
 timeShift = futureSteps
 
+# Define function for writing variables
+def writeVar(var):
+    try:
+        config.var # TODO Fix referencing right value, not "var"
+    except NameError:
+        print("Enter value of \'" + var + "\":")
+        userInput = input()
+        varWritten = False
+        while not varWritten:
+            #try:
+                if int(varWritten) != 0:
+                    print("TADA")
+
+
 # Write variables to config.py
 with open("config.py", "a") as f:
     try:

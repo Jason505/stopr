@@ -1,4 +1,4 @@
-# Take prepared data and train model on it
+# Deprecated script for training data; not updated for a while
 from dateutil import *
 from dateutil.rrule import *
 from keras.models import load_model
@@ -14,11 +14,6 @@ importlib.reload(config)
 
 futureSteps = config.futureSteps
 pastSteps = config.pastSteps
-
-# TODO IMPORTANT fix cheating with predicting
-
-# TODO if model already exists, choose if it should be used or retrained
-# TODO Fix RMSE calculation
 
 folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")

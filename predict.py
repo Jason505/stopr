@@ -18,8 +18,6 @@ pastSteps = config.pastSteps
 # timeShift = config.timeShift
 timeShift = 300
 
-# TODO Fix RMSE calculation
-
 folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 scalerPath = os.path.join(folderPath, "scaler.dat")

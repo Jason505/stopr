@@ -2,10 +2,21 @@
 from os import path
 
 # Check if gui mode is present; if so, set bool value so other parts of script so they know it.
-# TODO add manual asking if user wants GUI or cmd version
-if path.exists("gui.py"):
-    guiMode = True
+print("Do you want to run code in GUI mode? [Y/N]")
+userInput = input()
+if str.lower(userInput) == "n":
+    guiMode = False
+    print("Running code in command line . . .")
+elif str.lower(userInput) == "y":
+    if path.exists("gui.py"):
+        guiMode = True
+        print("Running code with GUI . . .")
+    else:
+        print("Files required for GUI not found.")
+        print("Running code in command line . . .")
+        guiMode = False
 else:
+    print("Invalid entry, assuming \"N\" as an answer . . .")
     guiMode = False
 
 # Write variables to config.py
