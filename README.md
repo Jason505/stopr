@@ -4,6 +4,7 @@
 
 **Requirments**
 * Windows 7/8/10
+* Python 3.7.x
 * For optimal perfonamce at least Intel Core i3 (or equivalent)
 
 Every time run the script using *main.py*.
