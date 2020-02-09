@@ -26,9 +26,6 @@ filesPath = os.path.join(appPath, ticker)
 dataPath = os.path.join(filesPath, "data.csv")
 
 # Make paths if they do not exist and asks if the data should be updated
-# TODO add automated procedure to find out if newer data is available
-if not os.path.exists(appPath):
-    os.mkdir(appPath)
 if not os.path.exists(filesPath):
     os.mkdir(filesPath)
 else:
@@ -51,7 +48,7 @@ if forceUpdate:
     df.to_csv(dataPath)
 
 # Write important global variables to configfile
-with open("config.py", "a") as f:
+with open("config.py", "w+") as f:
     try:
         config.ticker
     except NameError:

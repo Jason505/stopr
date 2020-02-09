@@ -1,30 +1,15 @@
 # Main file
-from os import path
+import os
+import subprocess
 
-# Check if gui mode is present; if so, set bool value so other parts of script so they know it.
-print("Do you want to run code in GUI mode? [Y/N]")
-userInput = input()
-if str.lower(userInput) == "n":
-    guiMode = False
-    print("Running code in command line . . .")
-elif str.lower(userInput) == "y":
-    if path.exists("gui.py"):
-        guiMode = True
-        print("Running code with GUI . . .")
-    else:
-        print("Files required for GUI not found.")
-        print("Running code in command line . . .")
-        guiMode = False
-else:
-    print("Invalid entry, assuming \"N\" as an answer . . .")
-    guiMode = False
-
-# Write variables to config.py
-with open("config.py", "w+") as f:
-    f.write("guiMode = " + str(guiMode))
+# Create paths for files if they do not exist
+# Also, if the app path does not exist, it is clear that the app is being run for the first time => install packages
+appPath = os.path.join(os.getenv("APPDATA"), "Stopr")
+if not os.path.exists(appPath):
+    os.mkdir(appPath)
+    subprocess.run("pip install -r packages.txt")
 
 # Import subprograms
-# TODO add library checking and automatic installation of them
 import download
 import train
 import predict

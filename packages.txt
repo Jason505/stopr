@@ -1,0 +1,10 @@
+pandas
+yfinance
+importlib
+tensorflow
+keras
+joblib
+numpy
+sklearn
+dateutil
+matplotlib
