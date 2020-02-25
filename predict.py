@@ -18,7 +18,7 @@ pastSteps = config.pastSteps
 # timeShift = config.timeShift
 timeShift = 300
 
-folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
+folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 scalerPath = os.path.join(folderPath, "scaler.dat")
 
@@ -38,7 +38,7 @@ predictData = predictData.reshape(-1, 1)
 
 # Load scaler used in train part and descale predicted data
 scaler = joblib.load(scalerPath)
-predictedData = np.round(scaler.inverse_transform(predictData), decimals=3)
+predictedData = np.round(scaler.inverse_transform(predictData), decimals=2)
 predictedData = predictedData[pastSteps:pastSteps+futureSteps, 0]
 
 # From date of last non-generated value find out the date of first generated value, then make

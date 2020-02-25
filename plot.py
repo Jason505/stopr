@@ -8,7 +8,7 @@ import pandas as pd
 pd.plotting.register_matplotlib_converters()
 
 # Initialization of essential paths
-folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
+folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 predictPath = os.path.join(folderPath, "predict.csv")
 

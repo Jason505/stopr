@@ -38,19 +38,19 @@ def writeVar(var):
 with open("config.py", "a") as f:
     try:
         config.pastSteps
-    except NameError:
+    except (NameError, AttributeError) as e:
         f.write("\npastSteps = " + str(pastSteps))
     try:
         config.futureSteps
-    except NameError:
+    except (NameError, AttributeError) as e:
         f.write("\nfutureSteps = " + str(futureSteps))
     try:
         config.timeShift
-    except NameError:
+    except (NameError, AttributeError) as e:
         f.write("\ntimeShift = " + str(timeShift))
 
 # Paths for storing user data
-folderPath = os.path.join(os.getenv("APPDATA"), "Stopr", config.ticker)
+folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 scalerPath = os.path.join(folderPath, "scaler.dat")
 
@@ -63,6 +63,7 @@ scaledData = scaler.fit_transform(data.reshape(-1, 1))
 joblib.dump(scaler, scalerPath)
 
 df["Scaled"] = scaledData
+df["Scaled"].round(decimals=3)
 df.to_csv(dataPath, index=False)
 
 # Define the training dataset and check if the predictLength is positive
@@ -86,12 +87,15 @@ trainX = np.reshape(trainX, (int(len(trainX)/pastSteps), pastSteps, 1))
 
 # Build and compile the model, then save it to TICKER dir
 model = Sequential()
-model.add(LSTM(200, return_sequences=True, input_shape=(trainX.shape[1], 1)))
+model.add(LSTM(250, return_sequences=True, input_shape=(trainX.shape[1], 1)))
 model.add(Dropout(0.1))
-model.add(LSTM(100))
-model.add(Dense(100))
-model.add(Dense(50))
-model.add(Dense(1))
+model.add(LSTM(800, return_sequences=True))
+model.add(Dropout(0.1))
+model.add(Dense(800, return_sequences=True))
+model.add(Dropout(0.1))
+model.add(Dense(800, return_sequences=True))
+model.add(Dropout(0.1))
+model.add(Dense(250))
 model.compile(optimizer="adam", loss="mean_squared_error")
-model.fit(trainX, trainY, validation_split=1, epochs=5, verbose=2)
+model.fit(trainX, trainY, validation_split=1, epochs=10)
 model.save(os.path.join(folderPath, "model.h5"))
