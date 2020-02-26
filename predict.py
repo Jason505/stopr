@@ -15,8 +15,7 @@ importlib.reload(config)
 
 futureSteps = config.futureSteps
 pastSteps = config.pastSteps
-# timeShift = config.timeShift
-timeShift = 300
+timeShift = config.timeShift
 
 folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
 dataPath = os.path.join(folderPath, "data.csv")
@@ -30,24 +29,20 @@ predictData = data.to_numpy()
 
 # Load model and predict next *futureSteps* values
 model = load_model(os.path.join(folderPath, "model.h5"))
-for i in range(0, futureSteps):
-    toPredict = predictData[i:pastSteps+i]
-    toPredict = np.reshape(toPredict, (1, pastSteps, 1))
-    predictData = np.append(predictData, model.predict(toPredict))
-predictData = predictData.reshape(-1, 1)
+predictData = np.reshape(predictData, (1, pastSteps, 1))
+predictedData = np.append(predictData[0, pastSteps-1:pastSteps, 0], model.predict(predictData))
+predictedData = predictedData.reshape(-1, 1)
 
 # Load scaler used in train part and descale predicted data
 scaler = joblib.load(scalerPath)
-predictedData = np.round(scaler.inverse_transform(predictData), decimals=2)
-predictedData = predictedData[pastSteps:pastSteps+futureSteps, 0]
+predictedData = np.round(scaler.inverse_transform(predictedData), decimals=2)
 
 # From date of last non-generated value find out the date of first generated value, then make
 # datasheet of dates for all generated data.
 lastDate = df["Date"].to_numpy()
 lastDate = lastDate[predictLength-timeShift-1]
 lastDate = datetime.strptime(lastDate, "%Y-%m-%d")
-lastDate = pd.DataFrame(rrule(DAILY, dtstart=lastDate, count=2, byweekday=(MO, TU, WE, TH, FR))).iloc[1, 0]
-timestamp = rrule(DAILY, dtstart=lastDate, count=futureSteps, byweekday=(MO, TU, WE, TH, FR))
+timestamp = rrule(DAILY, dtstart=lastDate, count=futureSteps+1, byweekday=(MO, TU, WE, TH, FR))
 
 # Concat the dates with values and save it to predict.csv
 timestamp = pd.DataFrame(timestamp).reset_index(drop=True)

@@ -4,6 +4,15 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Reload config for eventual changes
+import importlib
+import config
+importlib.reload(config)
+
+futureSteps = config.futureSteps
+pastSteps = config.pastSteps
+timeShift = config.timeShift
+
 # For future support
 pd.plotting.register_matplotlib_converters()
 
@@ -15,7 +24,9 @@ predictPath = os.path.join(folderPath, "predict.csv")
 # Getting historic data from "data.csv"
 df = pd.read_csv(dataPath)
 data = df["Close"].to_numpy()
+data = data[len(data)-pastSteps-futureSteps:len(data)-futureSteps]
 dataDate = df["Date"].to_numpy()
+dataDate = dataDate[len(dataDate)-pastSteps-futureSteps:len(dataDate)-futureSteps]
 dataDate = dataDate.astype("datetime64")
 
 # Getting prediction data from "predict.csv"

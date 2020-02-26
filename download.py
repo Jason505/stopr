@@ -11,7 +11,7 @@ invalidTicker = True
 while invalidTicker:
     print("Type custom ticker or press Enter to continue with preselected ticker . . .")
     print("Default: " + ticker)
-    userInput = input()
+    userInput = input().upper()
     if userInput != "":
         checkData = yf.download(userInput, period="1d")
         if not checkData.empty:

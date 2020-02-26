@@ -14,11 +14,11 @@ importlib.reload(config)
 
 # Initialization of important global variables:
 # How many values from the past we are going to use for prediction:
-pastSteps = 120
+pastSteps = 150
 # How many steps to the future we are going to predict:
-futureSteps = 100
+futureSteps = 30
 # Do we want to predict historic data or *real* future data?
-timeShift = futureSteps
+timeShift = futureSteps+50
 
 # Define function for writing variables
 def writeVar(var):
@@ -58,12 +58,12 @@ scalerPath = os.path.join(folderPath, "scaler.dat")
 df = pd.read_csv(dataPath)
 data = df["Close"].to_numpy()
 
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range=(0.25, 0.75))
 scaledData = scaler.fit_transform(data.reshape(-1, 1))
 joblib.dump(scaler, scalerPath)
 
 df["Scaled"] = scaledData
-df["Scaled"].round(decimals=3)
+#df["Scaled"].round(decimals=2)
 df.to_csv(dataPath, index=False)
 
 # Define the training dataset and check if the predictLength is positive
@@ -77,25 +77,25 @@ trainData = np.reshape(trainData, (len(trainData), 1))
 trainX = np.array([])
 trainY = np.array([])
 
-for i in range(pastSteps, len(trainData)):
-    trainX = np.append(trainX, trainData[i - pastSteps:i, 0])
-    trainY = np.append(trainY, trainData[i, 0])
+for i in range(0, len(trainData)-pastSteps-futureSteps):
+    trainX = np.append(trainX, trainData[i:i+pastSteps, 0])
+    trainY = np.append(trainY, trainData[i+pastSteps:i+pastSteps+futureSteps, 0])
 
 # Reshape data to 3D, first dimension is count of output data, second defines from how many values it will be
 # predicted, and the last dimension is set to 1 (because we have only one type of data)
 trainX = np.reshape(trainX, (int(len(trainX)/pastSteps), pastSteps, 1))
+trainY = np.reshape(trainY, (int(len(trainY)/futureSteps), futureSteps))
 
 # Build and compile the model, then save it to TICKER dir
 model = Sequential()
-model.add(LSTM(250, return_sequences=True, input_shape=(trainX.shape[1], 1)))
+model.add(LSTM(futureSteps, return_sequences=True, input_shape=(trainX.shape[1], 1)))
 model.add(Dropout(0.1))
-model.add(LSTM(800, return_sequences=True))
+model.add(LSTM(futureSteps*2, return_sequences=True))
 model.add(Dropout(0.1))
-model.add(Dense(800, return_sequences=True))
+model.add(LSTM(futureSteps*3, return_sequences=True))
 model.add(Dropout(0.1))
-model.add(Dense(800, return_sequences=True))
-model.add(Dropout(0.1))
-model.add(Dense(250))
+model.add(LSTM(futureSteps*2))
+model.add(Dense(futureSteps))
 model.compile(optimizer="adam", loss="mean_squared_error")
-model.fit(trainX, trainY, validation_split=1, epochs=10)
+model.fit(trainX, trainY, validation_split=1, epochs=5)
 model.save(os.path.join(folderPath, "model.h5"))
