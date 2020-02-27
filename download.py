@@ -1,4 +1,5 @@
 # Download and prepare data table for predicting
+from functions import *
 import pandas as pd
 import os
 import yfinance as yf

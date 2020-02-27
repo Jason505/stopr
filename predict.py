@@ -2,22 +2,17 @@
 from datetime import datetime
 from dateutil import *
 from dateutil.rrule import *
+from functions import *
 import joblib
 from keras.models import load_model
 import numpy as np
 import os
 import pandas as pd
 
-# Reload config for eventual changes
-import importlib
-import config
-importlib.reload(config)
-
-futureSteps = config.futureSteps
-pastSteps = config.pastSteps
-timeShift = config.timeShift
-
-folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
+reload_config()
+from config import *
+# Initialization of essential paths
+folderPath = os.path.join(os.getenv("APPDATA"), "stopr", ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 scalerPath = os.path.join(folderPath, "scaler.dat")
 
@@ -31,11 +26,13 @@ predictData = data.to_numpy()
 model = load_model(os.path.join(folderPath, "model.h5"))
 predictData = np.reshape(predictData, (1, pastSteps, 1))
 predictedData = np.append(predictData[0, pastSteps-1:pastSteps, 0], model.predict(predictData))
+predictData = predictData.reshape(-1, 1)
 predictedData = predictedData.reshape(-1, 1)
 
 # Load scaler used in train part and descale predicted data
 scaler = joblib.load(scalerPath)
 predictedData = np.round(scaler.inverse_transform(predictedData), decimals=2)
+predictData = np.round(scaler.inverse_transform(predictData), decimals=2)
 
 # From date of last non-generated value find out the date of first generated value, then make
 # datasheet of dates for all generated data.

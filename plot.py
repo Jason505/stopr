@@ -1,32 +1,26 @@
 # Plot the historic & predicted data
-import config
+from config import *
+from functions import *
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# Reload config for eventual changes
-import importlib
-import config
-importlib.reload(config)
-
-futureSteps = config.futureSteps
-pastSteps = config.pastSteps
-timeShift = config.timeShift
-
+reload_config()
+from config import *
 # For future support
 pd.plotting.register_matplotlib_converters()
 
 # Initialization of essential paths
-folderPath = os.path.join(os.getenv("APPDATA"), "stopr", config.ticker)
+folderPath = os.path.join(os.getenv("APPDATA"), "stopr", ticker)
 dataPath = os.path.join(folderPath, "data.csv")
 predictPath = os.path.join(folderPath, "predict.csv")
 
 # Getting historic data from "data.csv"
 df = pd.read_csv(dataPath)
 data = df["Close"].to_numpy()
-data = data[len(data)-pastSteps-futureSteps:len(data)-futureSteps]
+data = data[len(data)-timeShift-futureSteps*2:len(data)-timeShift+futureSteps*2]
 dataDate = df["Date"].to_numpy()
-dataDate = dataDate[len(dataDate)-pastSteps-futureSteps:len(dataDate)-futureSteps]
+dataDate = dataDate[len(dataDate)-timeShift-futureSteps*2:len(dataDate)-timeShift+futureSteps*2]
 dataDate = dataDate.astype("datetime64")
 
 # Getting prediction data from "predict.csv"
@@ -37,7 +31,7 @@ predictDate = predictDate.astype("datetime64")
 
 # Plot the graph with used
 plt.style.use("dark.mplstyle")
-plt.title("Close price of ticker " + config.ticker)
+plt.title("Close price of ticker " + ticker)
 plt.xlabel("Datestamp")
 plt.ylabel("Close price (USD)")
 historic = plt.plot(dataDate, data, label="Historic data")
