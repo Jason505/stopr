@@ -8,6 +8,8 @@ appPath = os.path.join(os.getenv("APPDATA"), "stopr")
 if not os.path.exists(appPath):
     os.mkdir(appPath)
     subprocess.run("pip install -r packages.txt")
+if os.path.exists("config.py"):
+    os.remove("config.py")
 
 # Import subprograms
 import download

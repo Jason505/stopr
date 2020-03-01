@@ -1,5 +1,7 @@
 # Define functions for writing variables
+
 def writevar(name):  # For user input
+    import config
     command = "config." + name
     try:
         exec(command)
@@ -18,6 +20,7 @@ def writevar(name):  # For user input
 
 
 def writevar(name, value):  # For predefined values
+    import config
     command = "config." + name
     try:
         exec(command)

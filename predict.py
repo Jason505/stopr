@@ -19,20 +19,47 @@ scalerPath = os.path.join(folderPath, "scaler.dat")
 predictLength = int(sum(1 for line in open(dataPath)))
 df = pd.read_csv(dataPath)
 data = df["Scaled"]
-data = data[predictLength-pastSteps-timeShift:predictLength-timeShift]
-predictData = data.to_numpy()
+predictData = data[predictLength-pastSteps-timeShift:predictLength-timeShift]
+predictData = predictData.to_numpy()
 
 # Load model and predict next *futureSteps* values
-model = load_model(os.path.join(folderPath, "model.h5"))
-predictData = np.reshape(predictData, (1, pastSteps, 1))
-predictedData = np.append(predictData[0, pastSteps-1:pastSteps, 0], model.predict(predictData))
-predictData = predictData.reshape(-1, 1)
-predictedData = predictedData.reshape(-1, 1)
+try:
+    model = load_model(os.path.join(folderPath, "models", "model.h5"))
+except:
+    pass
+
+print("Predicting in progress . . .")
+predictedData = predictData[pastSteps-1:pastSteps]
+if modelType == 1:
+    predictData = np.reshape(predictData, (1, pastSteps, 1))
+    predictedData = np.append(predictedData, model.predict(predictData))
+elif modelType == 2:
+    for i in range(0, futureSteps):
+        toPredict = predictData[i:pastSteps + i]
+        toPredict = np.reshape(toPredict, (1, pastSteps, 1))
+        predictData = np.append(predictData, model.predict(toPredict))
+    predictedData = predictData[pastSteps:pastSteps + futureSteps]
+elif modelType == 3:
+    predictData = data[predictLength-pastSteps-timeShift:predictLength-timeShift+futureSteps]
+    predictData = predictData.to_numpy()
+    for i in range(0, futureSteps):
+        toPredict = predictData[i:pastSteps + i]
+        toPredict = np.reshape(toPredict, (1, pastSteps, 1))
+        predictedData = np.append(predictedData, model.predict(toPredict))
+else:
+    for i in range(0, futureSteps):
+        print("\nPredicting " + str(i+1) + ". step")
+        model = load_model(os.path.join(folderPath, "models", "model_" + str(i) + ".h5"))
+        toPredict = predictData[:pastSteps]
+        toPredict = np.reshape(toPredict, (1, pastSteps, 1))
+        predictedData = np.append(predictedData, model.predict(toPredict))
+        del model
+
 
 # Load scaler used in train part and descale predicted data
+predictedData = predictedData.reshape(-1, 1)
 scaler = joblib.load(scalerPath)
 predictedData = np.round(scaler.inverse_transform(predictedData), decimals=2)
-predictData = np.round(scaler.inverse_transform(predictData), decimals=2)
 
 # From date of last non-generated value find out the date of first generated value, then make
 # datasheet of dates for all generated data.
