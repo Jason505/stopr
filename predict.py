@@ -5,6 +5,7 @@ from dateutil.rrule import *
 from functions import *
 import joblib
 from keras.models import load_model
+from keras.losses import mean_squared_error
 import numpy as np
 import os
 import pandas as pd
@@ -20,6 +21,7 @@ predictLength = int(sum(1 for line in open(dataPath)))
 df = pd.read_csv(dataPath)
 data = df["Scaled"]
 predictData = data[predictLength-pastSteps-timeShift:predictLength-timeShift]
+trueData = data[predictLength-timeShift:predictLength+-timeShift+futureSteps]
 predictData = predictData.to_numpy()
 
 # Load model and predict next *futureSteps* values
@@ -29,7 +31,7 @@ except:
     pass
 
 print("Predicting in progress . . .")
-predictedData = predictData[pastSteps-1:pastSteps]
+predictedData = []
 if modelType == 1:
     predictData = np.reshape(predictData, (1, pastSteps, 1))
     predictedData = np.append(predictedData, model.predict(predictData))
@@ -48,7 +50,7 @@ elif modelType == 3:
         predictedData = np.append(predictedData, model.predict(toPredict))
 else:
     for i in range(0, futureSteps):
-        print("\nPredicting " + str(i+1) + ". step")
+        print("\nPredicting " + str(i+1) + ". step . . .")
         model = load_model(os.path.join(folderPath, "models", "model_" + str(i) + ".h5"))
         toPredict = predictData[:pastSteps]
         toPredict = np.reshape(toPredict, (1, pastSteps, 1))
@@ -74,8 +76,7 @@ saveData = pd.concat([timestamp, pd.DataFrame(predictedData)], axis=1, ignore_in
 saveData.columns = ["Date", "Value"]
 saveData.to_csv(os.path.join(folderPath, "predict.csv"), index=False)
 
-# TODO Fix RMSE calculation & add other error calculations
-# Calculate the RMSE
-# rmse = np.sqrt(((predictedData - predictY) ** 2).mean())
-# print("Calculated RMSE:")
-# print(rmse)
+# Calculate the MSE
+MSE = mean_squared_error(trueData, predictedData).numpy()
+MSE = np.average(MSE)
+print("MSE: " + str(MSE))

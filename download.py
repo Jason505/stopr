@@ -61,7 +61,7 @@ if not os.path.exists(os.path.join(filesPath, "models")):
 
 # Download, sort and save data if forceUpdate is enabled
 print("Update of ticker data in progress . . .")
-data = yf.download(ticker, period="5Y", prepost=True).to_csv()
+data = yf.download(ticker, period="max", prepost=True).to_csv()
 with open(dataPath, "w+") as f:
     f.write(data)
 df = pd.read_csv(dataPath)
