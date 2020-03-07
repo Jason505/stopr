@@ -5,7 +5,7 @@ from dateutil.rrule import *
 from functions import *
 import joblib
 from keras.models import load_model
-from keras.losses import mean_squared_error
+from keras.losses import mean_absolute_percentage_error
 import numpy as np
 import os
 import pandas as pd
@@ -20,8 +20,9 @@ scalerPath = os.path.join(folderPath, "scaler.dat")
 predictLength = int(sum(1 for line in open(dataPath)))
 df = pd.read_csv(dataPath)
 data = df["Scaled"]
+trueData = df["Close"]
 predictData = data[predictLength-pastSteps-timeShift:predictLength-timeShift]
-trueData = data[predictLength-timeShift:predictLength+-timeShift+futureSteps]
+trueData = trueData[predictLength-timeShift:predictLength+-timeShift+futureSteps]
 predictData = predictData.to_numpy()
 
 # Load model and predict next *futureSteps* values
@@ -77,6 +78,7 @@ saveData.columns = ["Date", "Value"]
 saveData.to_csv(os.path.join(folderPath, "predict.csv"), index=False)
 
 # Calculate the MSE
-MSE = mean_squared_error(trueData, predictedData).numpy()
-MSE = np.average(MSE)
-print("MSE: " + str(MSE))
+MAPE = mean_absolute_percentage_error(trueData, predictedData).numpy()
+MAPE = np.average(MAPE)
+MAPE = round(MAPE, 2)
+print("MAPE: " + str(MAPE) + "%")
