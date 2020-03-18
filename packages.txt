@@ -1,10 +1,9 @@
 pandas
 yfinance
-importlib
-tensorflow
+tensorflow==2.0.0
 keras
 joblib
 numpy
-sklearn
-dateutil
+scikit-learn
+datetime
 matplotlib
