@@ -7,17 +7,18 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+from time import time_ns
 
 reload_config()
 from config import *
 # Write important variables to config.py:
 # How many steps to the future we are going to predict
-futureSteps = 20
+futureSteps = 90
 # How many values from the past we are going to use for prediction
 pastSteps = futureSteps
 # Time shift to the past; if zero, we are really predicting future data,
 # if it equals futureSteps, we are predicting data prior to today.
-timeShift = futureSteps+30
+timeShift = futureSteps+50
 
 if devMode:
     writevar("futureSteps", futureSteps)
@@ -46,7 +47,7 @@ df.to_csv(dataPath, index=False)
 predictLength = int(sum(1 for line in open(dataPath)) - 1)
 if predictLength < 0:
     print("Variable *predictLength* isn't positive. Please choose shorter interval.")
-trainData = scaledData[predictLength - timeShift - pastSteps*2:predictLength - timeShift + futureSteps]
+trainData = scaledData[predictLength - timeShift - pastSteps*3:predictLength - timeShift + futureSteps]
 trainData = np.reshape(trainData, (len(trainData), 1))
 
 # In trainX will be *pastSteps* values, and in trainY will be wanted value.
@@ -54,25 +55,19 @@ trainX = np.array([])
 trainY = np.array([])
 
 print("Model training in progress . . .")
+startT = time_ns()
 if modelType == 1:
     for i in range(0, len(trainData) - pastSteps - futureSteps):
         trainX = np.append(trainX, trainData[i:i + pastSteps, 0])
         trainY = np.append(trainY, trainData[i + pastSteps:i + pastSteps + futureSteps, 0])
     trainX = np.reshape(trainX, (int(len(trainX) / pastSteps), pastSteps, 1))
     trainY = np.reshape(trainY, (int(len(trainY) / futureSteps), futureSteps, 1))
-
-    #model = Sequential()
-    #model.add(LSTM(units=futureSteps, return_sequences=True, input_shape=(trainX.shape[1], 1)))
-    #model.add(LSTM(units=trainY.shape[1], activation="hard_sigmoid", input_shape=(trainX.shape[1], 1)))
-    #model.compile(optimizer="adadelta", loss="mean_absolute_percentage_error")
-
 elif modelType == 2 or modelType == 3:
     for i in range(0, len(trainData) - pastSteps - futureSteps):
         trainX = np.append(trainX, trainData[i:i+pastSteps, 0])
         trainY = np.append(trainY, trainData[i + pastSteps:i + pastSteps + 1, 0])
     trainX = np.reshape(trainX, (int(len(trainX) / pastSteps), pastSteps, 1))
     trainY = np.reshape(trainY, (len(trainY), 1, 1))
-
 if modelType == 4:
     for n in range(0, futureSteps):
         for i in range(0, len(trainData) - pastSteps - futureSteps):
@@ -83,8 +78,11 @@ if modelType == 4:
 
 # Build and compile the model, then save it to TICKER dir
 model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(trainX.shape[1], 1)))
-model.add(LSTM(50))
+if modelType == 1:
+    model.add(LSTM(75, return_sequences=True, input_shape=(trainX.shape[1], 1)))
+    model.add(LSTM(75))
+else:
+    model.add(LSTM(futureSteps, input_shape=(trainX.shape[1], 1)))
 model.add(Dense(trainY.shape[1]))
 model.compile(optimizer="adam", loss="mean_absolute_percentage_error")
 for i in range(0, trainX.shape[2]):
@@ -92,8 +90,11 @@ for i in range(0, trainX.shape[2]):
     usedY = np.reshape(trainY[:, :, i], (trainY.shape[0], trainY.shape[1]))
     if modelType == 4:
         print("\nTraining model for " + str(i+1) + ". step")
-    model.fit(usedX, usedY, validation_split=1, epochs=10, batch_size=2)
+    model.fit(usedX, usedY, validation_split=1, epochs=9, batch_size=3)
     if modelType != 4:
         model.save(os.path.join(folderPath, "models", "model.h5"))
     else:
         model.save(os.path.join(folderPath, "models", "model_" + str(i) + ".h5"))
+endT = time_ns()
+deltaT = str(round(float(endT - startT)/1000000000, 3))
+print("Elapsed time: " + deltaT + " s")

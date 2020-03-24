@@ -2,6 +2,7 @@
 from functions import *
 import pandas as pd
 import os
+from shutil import rmtree
 import yfinance as yf
 
 forceUpdate = True
@@ -56,8 +57,8 @@ dataPath = os.path.join(filesPath, "data.csv")
 # Make paths if they do not exist and asks if the data should be updated
 if not os.path.exists(filesPath):
     os.mkdir(filesPath)
-if not os.path.exists(os.path.join(filesPath, "models")):
-    os.mkdir(os.path.join(filesPath, "models"))
+rmtree(os.path.join(filesPath, "models"))
+os.mkdir(os.path.join(filesPath, "models"))
 
 # Download, sort and save data if forceUpdate is enabled
 print("Update of ticker data in progress . . .")

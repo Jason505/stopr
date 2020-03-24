@@ -18,9 +18,9 @@ predictPath = os.path.join(folderPath, "predict.csv")
 # Getting historic data from "data.csv"
 df = pd.read_csv(dataPath)
 data = df["Close"].to_numpy()
-data = data[len(data)-timeShift-futureSteps*2:len(data)-timeShift+futureSteps*2]
+data = data[len(data)-timeShift-futureSteps:len(data)-timeShift+futureSteps*2]
 dataDate = df["Date"].to_numpy()
-dataDate = dataDate[len(dataDate)-timeShift-futureSteps*2:len(dataDate)-timeShift+futureSteps*2]
+dataDate = dataDate[len(dataDate)-timeShift-futureSteps:len(dataDate)-timeShift+futureSteps*2]
 dataDate = dataDate.astype("datetime64")
 
 # Getting prediction data from "predict.csv"
@@ -31,9 +31,11 @@ predictDate = predictDate.astype("datetime64")
 
 # Plot the graph with used style
 # plt.style.use("dark.mplstyle")
+plt.margins(0, 0, tight=True)
+plt.rcParams.update({"font.size": 16})
 plt.title("Close price of ticker " + ticker)
-plt.xlabel("Datestamp")
-plt.ylabel("Close price (USD)")
+plt.xlabel("Datestamp", fontsize=14)
+plt.ylabel("Close price (USD)", fontsize=14)
 historic = plt.plot(dataDate, data, label="Historic data")
 predicted = plt.plot(predictDate, predict, label="Predicted data")
 plt.tight_layout()

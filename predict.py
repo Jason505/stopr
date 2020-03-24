@@ -9,6 +9,7 @@ from keras.losses import mean_absolute_percentage_error
 import numpy as np
 import os
 import pandas as pd
+from time import time_ns
 
 reload_config()
 from config import *
@@ -26,6 +27,7 @@ trueData = trueData[predictLength-timeShift:predictLength+-timeShift+futureSteps
 predictData = predictData.to_numpy()
 
 # Load model and predict next *futureSteps* values
+startT = time_ns()
 try:
     model = load_model(os.path.join(folderPath, "models", "model.h5"))
 except:
@@ -57,7 +59,9 @@ else:
         toPredict = np.reshape(toPredict, (1, pastSteps, 1))
         predictedData = np.append(predictedData, model.predict(toPredict))
         del model
-
+endT = time_ns()
+deltaT = str(round(float(endT - startT)/1000000000, 3))
+print("Elapsed time: " + deltaT + " s")
 
 # Load scaler used in train part and descale predicted data
 predictedData = predictedData.reshape(-1, 1)
